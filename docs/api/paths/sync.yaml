@@ -1,0 +1,22 @@
+post:
+  summary: Sync new articles for all feeds
+  description: >
+    Fetches and stores new articles for every subscribed feed. Feeds with
+    source_type `bookmark` are silently skipped. Deduplicates by URL so
+    re-syncing does not create duplicate articles. Per-feed upstream errors
+    are captured in the result rather than failing the entire operation.
+  operationId: syncAll
+  tags: [Sync]
+  responses:
+    "200":
+      description: Sync completed for all non-bookmark feeds.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/SyncResultList.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

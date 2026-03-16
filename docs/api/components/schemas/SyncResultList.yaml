@@ -1,0 +1,10 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: "../components/schemas/FetchResult.yaml"
+  total:
+    type: integer
+    description: Number of feeds that were synced.
+required: [data, total]

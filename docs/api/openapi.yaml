@@ -7,6 +7,13 @@ info:
     REST API for the custom RSS reader CLI app. The CLI is a thin HTTP client;
     all reads and writes go through this API, which persists data in a local
     SQLite database.
+  contact:
+    name: Reader API
+    url: https://github.com/
+  license:
+    name: MIT
+
+security: []
 
 servers:
   - url: http://localhost:8000
@@ -17,16 +24,14 @@ paths:
     $ref: "./paths/feeds.yaml"
   /feeds/{id}:
     $ref: "./paths/feeds-id.yaml"
-  /feeds/{id}/fetch:
-    $ref: "./paths/feeds-id-fetch.yaml"
-  /feeds/fetch:
-    $ref: "./paths/feeds-fetch.yaml"
+  /feeds/{id}/sync:
+    $ref: "./paths/feeds-id-sync.yaml"
+  /sync:
+    $ref: "./paths/sync.yaml"
   /articles:
     $ref: "./paths/articles.yaml"
   /articles/{id}:
     $ref: "./paths/articles-id.yaml"
-  /articles/{id}/markdown:
-    $ref: "./paths/articles-id-markdown.yaml"
 
 components:
   schemas:
@@ -36,11 +41,17 @@ components:
       $ref: "./components/schemas/Article.yaml"
     FeedCreate:
       $ref: "./components/schemas/FeedCreate.yaml"
-    ArticleSave:
-      $ref: "./components/schemas/ArticleSave.yaml"
-    ArticlePatch:
-      $ref: "./components/schemas/ArticlePatch.yaml"
+    ArticleCreate:
+      $ref: "./components/schemas/ArticleCreate.yaml"
+    ArticleUpdate:
+      $ref: "./components/schemas/ArticleUpdate.yaml"
     FetchResult:
       $ref: "./components/schemas/FetchResult.yaml"
     Error:
       $ref: "./components/schemas/Error.yaml"
+    FeedList:
+      $ref: "./components/schemas/FeedList.yaml"
+    ArticleList:
+      $ref: "./components/schemas/ArticleList.yaml"
+    SyncResultList:
+      $ref: "./components/schemas/SyncResultList.yaml"

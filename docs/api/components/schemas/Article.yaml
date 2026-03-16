@@ -2,49 +2,76 @@ type: object
 properties:
   id:
     type: integer
-    description: Auto-increment primary key.
+    readOnly: true
+    description: Unique identifier for the article.
+    example: 42
   feed_id:
     type: integer
-    description: Foreign key referencing feeds.id.
+    readOnly: true
+    description: ID of the feed this article belongs to.
+    example: 3
   title:
     type: string
+    readOnly: true
     description: Article title.
+    example: "Understanding OpenAPI 3.1"
   url:
     type: string
     format: uri
-    description: Canonical article URL (unique).
+    readOnly: true
+    description: Canonical URL of the article.
+    example: "https://example.com/articles/openapi-31"
   author:
-    type: string
-    nullable: true
-    description: Author name.
+    type: [string, 'null']
+    readOnly: true
+    description: Author name, if available.
+    example: "Jane Smith"
   content_html:
     type: string
-    description: Raw HTML content.
+    readOnly: true
+    description: Raw HTML content of the article.
   content_markdown:
     type: string
-    description: Converted markdown content.
+    readOnly: true
+    description: Markdown representation of the article content.
   summary:
-    type: string
-    nullable: true
+    type: [string, 'null']
+    readOnly: true
     description: Short excerpt or feed-provided summary.
+    example: "A deep dive into the changes introduced by OpenAPI 3.1..."
   published_at:
-    type: string
+    type: [string, 'null']
     format: date-time
-    nullable: true
-    description: Publication date from feed.
+    readOnly: true
+    description: Publication date reported by the feed. Null if not provided.
+    example: "2024-03-01T08:00:00Z"
   fetched_at:
     type: string
     format: date-time
-    description: When the article was fetched.
+    readOnly: true
+    description: When the article was fetched and stored.
+    example: "2024-03-10T14:22:00Z"
   state:
     type: string
     enum: [unread, read, read_again]
-    description: Reading state (default unread).
+    description: Reading state of the article.
+    example: "unread"
   warning:
     type: string
-    nullable: true
+    readOnly: true
     description: >
       Present when the article was saved but no content could be extracted
-      (e.g. paywalled or JS-rendered page). Only included in responses when
-      non-null.
+      (e.g. paywalled or JS-rendered page). Omitted when there is no warning.
 required: [id, feed_id, title, url, content_html, content_markdown, fetched_at, state]
+example:
+  id: 42
+  feed_id: 3
+  title: "Understanding OpenAPI 3.1"
+  url: "https://example.com/articles/openapi-31"
+  author: "Jane Smith"
+  content_html: "<p>A deep dive...</p>"
+  content_markdown: "A deep dive..."
+  summary: "A deep dive into the changes introduced by OpenAPI 3.1..."
+  published_at: "2024-03-01T08:00:00Z"
+  fetched_at: "2024-03-10T14:22:00Z"
+  state: "unread"

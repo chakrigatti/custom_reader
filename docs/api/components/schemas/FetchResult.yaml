@@ -3,10 +3,17 @@ properties:
   fetched:
     type: integer
     description: Number of new articles fetched and stored.
+    example: 5
   feed_id:
     type: integer
     description: ID of the feed that was fetched.
+    example: 3
   title:
     type: string
     description: Title of the feed that was fetched.
+    example: "Hacker News"
 required: [fetched, feed_id, title]
+example:
+  fetched: 5
+  feed_id: 3
+  title: "Hacker News"

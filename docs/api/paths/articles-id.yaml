@@ -1,6 +1,10 @@
 get:
   summary: Get article detail
-  description: Returns all fields for a single article.
+  description: >
+    Returns a single article. Supports content negotiation via the `Accept`
+    header: `application/json` returns the full article object (default);
+    `text/markdown` returns the article's markdown content as plain text,
+    suitable for piping to a pager or renderer.
   operationId: getArticle
   tags: [Articles]
   parameters:
@@ -12,20 +16,45 @@ get:
       description: Article ID.
   responses:
     "200":
-      description: Article detail.
+      description: Article detail (JSON) or markdown content (text/markdown).
+      headers:
+        ETag:
+          description: Entity tag for cache validation.
+          schema:
+            type: string
       content:
         application/json:
           schema:
             $ref: "../components/schemas/Article.yaml"
+        text/markdown:
+          schema:
+            type: string
     "404":
       description: Article not found.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "406":
+      description: >
+        Not Acceptable — only `application/json` and `text/markdown` are
+        supported.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
 
 patch:
   summary: Update article state
+  description: >
+    Updates the reading state of an article. Only the `state` field can be
+    updated; all other article fields are read-only.
   operationId: patchArticle
   tags: [Articles]
   parameters:
@@ -40,7 +69,7 @@ patch:
     content:
       application/json:
         schema:
-          $ref: "../components/schemas/ArticlePatch.yaml"
+          $ref: "../components/schemas/ArticleUpdate.yaml"
   responses:
     "200":
       description: Updated article.
@@ -48,15 +77,33 @@ patch:
         application/json:
           schema:
             $ref: "../components/schemas/Article.yaml"
+    "400":
+      description: Malformed request body.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
     "404":
       description: Article not found.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "415":
+      description: Unsupported media type.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
     "422":
       description: Invalid state value.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"

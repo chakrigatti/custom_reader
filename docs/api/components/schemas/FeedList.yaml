@@ -1,0 +1,16 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: "../components/schemas/Feed.yaml"
+  total:
+    type: integer
+    description: Total number of feeds matching the query.
+  limit:
+    type: integer
+    description: Maximum number of feeds returned.
+  offset:
+    type: integer
+    description: Number of feeds skipped.
+required: [data, total, limit, offset]

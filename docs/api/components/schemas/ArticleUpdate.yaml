@@ -1,0 +1,14 @@
+type: object
+description: >
+  Request body for updating an article. Only the `state` field can be
+  updated via this endpoint; all other article fields are read-only.
+properties:
+  state:
+    type: string
+    enum: [unread, read, read_again]
+    description: New reading state for the article.
+    example: "read"
+additionalProperties: false
+required: [state]
+example:
+  state: "read"

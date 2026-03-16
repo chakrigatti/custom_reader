@@ -1,0 +1,14 @@
+type: object
+description: Request body for saving a URL as a bookmark article.
+properties:
+  url:
+    type: string
+    format: uri
+    description: >
+      URL of the page to save. Must use the `http` or `https` scheme;
+      other schemes are rejected with 422.
+    example: "https://example.com/interesting-post"
+additionalProperties: false
+required: [url]
+example:
+  url: "https://example.com/interesting-post"

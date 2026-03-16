@@ -1,21 +1,10 @@
 post:
   summary: Save a bookmark article
-  description: |
-    Saves a standalone URL as a bookmark article under the sentinel "Saved
-    Articles" feed (id=1).
-
-    **Processing flow:**
-    1. Validate URL scheme (must be `http` or `https`) → 422 if not.
-    2. Check for duplicate URL → 409 with `{ "id": <existing_article_id> }` if
-       already saved.
-    3. Fetch the page via httpx (timeout=15s, follow redirects) → 422 on
-       network/HTTP failure.
-    4. Extract content with trafilatura; convert to markdown via markdownify.
-    5. Generate summary from first 300 characters of plain-text extraction.
-    6. Store article and return 201.
-
-    If no content could be extracted the article is still stored and the
-    response includes a `"warning"` field.
+  description: >
+    Fetches the page at the provided URL, extracts its content, and saves it
+    as a bookmark article under the "Saved Articles" feed. If no content could
+    be extracted, the article is still stored and the response includes a
+    `warning` field.
   operationId: saveArticle
   tags: [Articles]
   requestBody:
@@ -23,31 +12,68 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../components/schemas/ArticleSave.yaml"
+          $ref: "../components/schemas/ArticleCreate.yaml"
   responses:
     "201":
       description: Article saved.
+      headers:
+        Location:
+          description: URL of the newly created article resource.
+          schema:
+            type: string
+            format: uri
       content:
         application/json:
           schema:
             $ref: "../components/schemas/Article.yaml"
-    "409":
-      description: Article with this URL already exists.
+    "400":
+      description: Malformed request body.
       content:
-        application/json:
+        application/problem+json:
           schema:
-            type: object
-            properties:
-              id:
-                type: integer
-                description: ID of the existing article.
-            required: [id]
-    "422":
+            $ref: "../components/schemas/Error.yaml"
+    "409":
       description: >
-        Invalid URL scheme, network failure, or HTTP error while fetching the
-        page.
+        Article with this URL already exists. The response includes an
+        `existing_id` extension field with the ID of the existing article.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            allOf:
+              - $ref: "../components/schemas/Error.yaml"
+              - type: object
+                properties:
+                  existing_id:
+                    type: integer
+                    description: ID of the existing article.
+    "415":
+      description: Unsupported media type.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "422":
+      description: Invalid URL scheme (must be `http` or `https`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "502":
+      description: Upstream server returned an error response while fetching the page.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "503":
+      description: Network failure while fetching the page.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
 
@@ -82,20 +108,42 @@ get:
         type: string
         enum: [bookmark]
       description: >
-        Filter to bookmark articles (feed_id = 1). Mutually exclusive with
-        `feed_id`.
+        Filter to bookmark articles. Mutually exclusive with `feed_id`.
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 200
+      description: Maximum number of articles to return.
+    - name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of articles to skip before returning results.
   responses:
     "200":
-      description: Array of articles matching the filters.
+      description: Paginated list of articles matching the filters.
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: "../components/schemas/Article.yaml"
+            $ref: "../components/schemas/ArticleList.yaml"
     "422":
-      description: Both `source` and `feed_id` were supplied.
+      description: >
+        Invalid query parameters: both `source` and `feed_id` were supplied,
+        or an invalid enum value was provided for `state`.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"

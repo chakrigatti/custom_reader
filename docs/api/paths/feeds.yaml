@@ -15,20 +15,66 @@ post:
   responses:
     "201":
       description: Feed created.
+      headers:
+        Location:
+          description: URL of the newly created feed resource.
+          schema:
+            type: string
+            format: uri
       content:
         application/json:
           schema:
             $ref: "../components/schemas/Feed.yaml"
-    "409":
-      description: Feed with the resolved URL already exists.
+    "400":
+      description: Malformed request body.
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "409":
+      description: >
+        Feed with the resolved URL already exists. The response includes an
+        `existing_id` extension field with the ID of the existing feed.
+      content:
+        application/problem+json:
+          schema:
+            allOf:
+              - $ref: "../components/schemas/Error.yaml"
+              - type: object
+                properties:
+                  existing_id:
+                    type: integer
+                    description: ID of the existing feed.
+    "415":
+      description: Unsupported media type.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
     "422":
-      description: URL could not be resolved to a valid feed.
+      description: >
+        URL could not be resolved to a valid feed (invalid scheme, unparseable
+        URL, or invalid query parameter values).
       content:
-        application/json:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "502":
+      description: Upstream server returned an error response while resolving the feed URL.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "503":
+      description: Network failure while resolving the feed URL.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
 
@@ -36,12 +82,40 @@ get:
   summary: List all subscribed feeds
   operationId: listFeeds
   tags: [Feeds]
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 200
+      description: Maximum number of feeds to return.
+    - name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of feeds to skip before returning results.
   responses:
     "200":
-      description: Array of all feeds.
+      description: Paginated list of feeds.
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: "../components/schemas/Feed.yaml"
+            $ref: "../components/schemas/FeedList.yaml"
+    "422":
+      description: Invalid query parameter values.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

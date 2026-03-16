@@ -1,4 +1,5 @@
 type: object
+description: Request body for adding a new feed.
 properties:
   url:
     type: string
@@ -8,4 +9,8 @@ properties:
       RSS/Atom feed URLs are used directly, blog homepages are crawled for feed
       discovery, and X/Twitter handles or nitter URLs are converted to nitter
       RSS URLs.
+    example: "https://news.ycombinator.com/rss"
+additionalProperties: false
 required: [url]
+example:
+  url: "https://news.ycombinator.com/rss"

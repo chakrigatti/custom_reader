@@ -1,7 +1,10 @@
-get:
-  summary: Get a feed
-  description: Returns a single feed by ID.
-  operationId: getFeed
+post:
+  summary: Sync new articles for one feed
+  description: >
+    Fetches and stores new articles for the specified feed. Feeds with
+    source_type `bookmark` return a 422 error. Deduplicates by URL so
+    re-syncing a feed does not create duplicate articles.
+  operationId: syncFeed
   tags: [Feeds]
   parameters:
     - name: id
@@ -12,50 +15,33 @@ get:
       description: Feed ID.
   responses:
     "200":
-      description: Feed detail.
+      description: Sync completed.
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/Feed.yaml"
+            $ref: "../components/schemas/FetchResult.yaml"
     "404":
       description: Feed not found.
       content:
         application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
-    "500":
-      description: Unexpected server error.
-      content:
-        application/problem+json:
-          schema:
-            $ref: "../components/schemas/Error.yaml"
-
-delete:
-  summary: Remove a feed
-  description: >
-    Deletes a feed and all associated articles. Returns 403 if attempting to
-    delete the system-managed "Saved Articles" feed (id=1).
-  operationId: deleteFeed
-  tags: [Feeds]
-  parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: integer
-      description: Feed ID.
-  responses:
-    "204":
-      description: Feed deleted successfully.
-    "403":
+    "422":
       description: >
-        Forbidden. The "Saved Articles" feed (id=1) cannot be deleted.
+        Cannot sync a bookmark feed. Bookmark feeds do not have an upstream
+        source to fetch from.
       content:
         application/problem+json:
           schema:
             $ref: "../components/schemas/Error.yaml"
-    "404":
-      description: Feed not found.
+    "502":
+      description: Upstream server returned an error response while fetching the feed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "503":
+      description: Network failure while fetching the feed.
       content:
         application/problem+json:
           schema:

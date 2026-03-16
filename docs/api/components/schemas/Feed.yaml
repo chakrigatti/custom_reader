@@ -2,29 +2,50 @@ type: object
 properties:
   id:
     type: integer
-    description: Auto-increment primary key.
+    readOnly: true
+    description: Unique identifier for the feed.
+    example: 3
   title:
     type: string
     description: Feed title.
+    example: "Hacker News"
   feed_url:
     type: string
     format: uri
-    description: Resolved RSS/Atom URL (unique).
+    description: Resolved RSS/Atom URL for this feed.
+    example: "https://news.ycombinator.com/rss"
   site_url:
     type: string
     format: uri
-    description: Original site homepage URL.
+    description: Homepage URL of the site this feed belongs to.
+    example: "https://news.ycombinator.com"
   source_type:
     type: string
     enum: [rss, blog, nitter, bookmark]
-    description: How the feed was added.
+    description: >
+      How the feed was added. `rss` — direct RSS/Atom URL; `blog` — homepage
+      crawled for feed discovery; `nitter` — X/Twitter handle converted to a
+      Nitter RSS URL; `bookmark` — system-managed feed for saved bookmark
+      articles (id=1, read-only, cannot be deleted).
+    example: "rss"
   created_at:
     type: string
     format: date-time
+    readOnly: true
     description: When the feed was added.
+    example: "2024-01-15T09:30:00Z"
   last_fetched_at:
-    type: string
+    type: [string, 'null']
     format: date-time
-    nullable: true
-    description: Last successful fetch time.
+    readOnly: true
+    description: Timestamp of the last successful sync. Null if never synced.
+    example: "2024-03-10T14:22:00Z"
 required: [id, title, feed_url, site_url, source_type, created_at]
+example:
+  id: 3
+  title: "Hacker News"
+  feed_url: "https://news.ycombinator.com/rss"
+  site_url: "https://news.ycombinator.com"
+  source_type: "rss"
+  created_at: "2024-01-15T09:30:00Z"
+  last_fetched_at: "2024-03-10T14:22:00Z"

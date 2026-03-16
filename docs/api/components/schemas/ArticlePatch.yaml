@@ -1,7 +1,0 @@
-type: object
-properties:
-  state:
-    type: string
-    enum: [unread, read, read_again]
-    description: New reading state for the article.
-required: [state]
