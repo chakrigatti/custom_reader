@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Minimal Feed</title>
+    <link>https://minimal.com</link>
+    <item>
+      <link>https://minimal.com/post-1</link>
+    </item>
+    <item>
+      <link>https://minimal.com/post-2</link>
+    </item>
+  </channel>
+</rss>

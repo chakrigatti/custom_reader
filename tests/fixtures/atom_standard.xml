@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Atom Test Feed</title>
+  <link href="https://atomtest.com"/>
+  <id>urn:uuid:atom-test-feed</id>
+  <updated>2024-01-03T12:00:00Z</updated>
+  <entry>
+    <title>Atom Entry One</title>
+    <link href="https://atomtest.com/entry-1"/>
+    <id>urn:uuid:entry-1</id>
+    <updated>2024-01-01T12:00:00Z</updated>
+    <summary>First atom entry summary</summary>
+    <content type="html"><![CDATA[<p>Full atom entry content.</p>]]></content>
+  </entry>
+  <entry>
+    <title>Atom Entry Two</title>
+    <link href="https://atomtest.com/entry-2"/>
+    <id>urn:uuid:entry-2</id>
+    <updated>2024-01-02T12:00:00Z</updated>
+    <summary>Second atom entry summary</summary>
+  </entry>
+</feed>

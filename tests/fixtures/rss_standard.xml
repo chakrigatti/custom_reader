@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Blog</title>
+    <link>https://testblog.com</link>
+    <description>A test blog feed</description>
+    <item>
+      <title>First Article</title>
+      <link>https://testblog.com/article-1</link>
+      <description>Summary of first article</description>
+      <author>Alice</author>
+      <pubDate>Mon, 01 Jan 2024 12:00:00 GMT</pubDate>
+      <content:encoded><![CDATA[<p>Full content of the first article.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Second Article</title>
+      <link>https://testblog.com/article-2</link>
+      <description>Summary of second article</description>
+      <author>Bob</author>
+      <pubDate>Tue, 02 Jan 2024 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Third Article</title>
+      <link>https://testblog.com/article-3</link>
+      <description>Summary of third article</description>
+      <pubDate>Wed, 03 Jan 2024 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
