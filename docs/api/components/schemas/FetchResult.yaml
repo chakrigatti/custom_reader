@@ -1,0 +1,12 @@
+type: object
+properties:
+  fetched:
+    type: integer
+    description: Number of new articles fetched and stored.
+  feed_id:
+    type: integer
+    description: ID of the feed that was fetched.
+  title:
+    type: string
+    description: Title of the feed that was fetched.
+required: [fetched, feed_id, title]

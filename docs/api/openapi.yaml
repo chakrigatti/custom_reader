@@ -1,0 +1,46 @@
+openapi: "3.1.0"
+
+info:
+  title: Reader API
+  version: "1.0.0"
+  description: >
+    REST API for the custom RSS reader CLI app. The CLI is a thin HTTP client;
+    all reads and writes go through this API, which persists data in a local
+    SQLite database.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server (uvicorn)
+
+paths:
+  /feeds:
+    $ref: "./paths/feeds.yaml"
+  /feeds/{id}:
+    $ref: "./paths/feeds-id.yaml"
+  /feeds/{id}/fetch:
+    $ref: "./paths/feeds-id-fetch.yaml"
+  /feeds/fetch:
+    $ref: "./paths/feeds-fetch.yaml"
+  /articles:
+    $ref: "./paths/articles.yaml"
+  /articles/{id}:
+    $ref: "./paths/articles-id.yaml"
+  /articles/{id}/markdown:
+    $ref: "./paths/articles-id-markdown.yaml"
+
+components:
+  schemas:
+    Feed:
+      $ref: "./components/schemas/Feed.yaml"
+    Article:
+      $ref: "./components/schemas/Article.yaml"
+    FeedCreate:
+      $ref: "./components/schemas/FeedCreate.yaml"
+    ArticleSave:
+      $ref: "./components/schemas/ArticleSave.yaml"
+    ArticlePatch:
+      $ref: "./components/schemas/ArticlePatch.yaml"
+    FetchResult:
+      $ref: "./components/schemas/FetchResult.yaml"
+    Error:
+      $ref: "./components/schemas/Error.yaml"

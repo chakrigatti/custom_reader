@@ -1,0 +1,47 @@
+post:
+  summary: Add a feed
+  description: >
+    Auto-detects source type from the URL: RSS/Atom feed URLs are used directly,
+    blog homepages are crawled for feed link discovery, and X/Twitter handles or
+    nitter URLs are converted to a nitter RSS URL.
+  operationId: addFeed
+  tags: [Feeds]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/FeedCreate.yaml"
+  responses:
+    "201":
+      description: Feed created.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Feed.yaml"
+    "409":
+      description: Feed with the resolved URL already exists.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "422":
+      description: URL could not be resolved to a valid feed.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+
+get:
+  summary: List all subscribed feeds
+  operationId: listFeeds
+  tags: [Feeds]
+  responses:
+    "200":
+      description: Array of all feeds.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../components/schemas/Feed.yaml"

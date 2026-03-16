@@ -1,0 +1,9 @@
+type: object
+properties:
+  url:
+    type: string
+    format: uri
+    description: >
+      URL of the standalone article to save as a bookmark. Must use the
+      http or https scheme; other schemes are rejected with 422.
+required: [url]

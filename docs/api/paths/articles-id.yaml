@@ -1,0 +1,62 @@
+get:
+  summary: Get article detail
+  description: Returns all fields for a single article.
+  operationId: getArticle
+  tags: [Articles]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Article ID.
+  responses:
+    "200":
+      description: Article detail.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Article.yaml"
+    "404":
+      description: Article not found.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+
+patch:
+  summary: Update article state
+  operationId: patchArticle
+  tags: [Articles]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Article ID.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/ArticlePatch.yaml"
+  responses:
+    "200":
+      description: Updated article.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Article.yaml"
+    "404":
+      description: Article not found.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "422":
+      description: Invalid state value.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

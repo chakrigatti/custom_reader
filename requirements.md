@@ -29,6 +29,7 @@ The CLI never touches the database directly — all reads and writes go through 
 | RSS/Atom | Feed URL | feedparser directly |
 | Blog URL | Homepage URL | beautifulsoup4 auto-discovery via `<link rel="alternate">` + common paths (`/feed`, `/rss`, `/atom.xml`, `/feed.xml`, `/index.xml`) |
 | X/Twitter | Handle or nitter URL | Convert to nitter RSS URL (single configurable instance, no fallback in v1) |
+| Bookmark | Standalone URL | Fetch URL directly via httpx, extract content with trafilatura, store under sentinel feed |
 
 ---
 
@@ -42,9 +43,11 @@ The CLI never touches the database directly — all reads and writes go through 
 | `title` | TEXT | Feed title |
 | `feed_url` | TEXT UNIQUE | Resolved RSS/Atom URL |
 | `site_url` | TEXT | Original site homepage |
-| `source_type` | TEXT | `rss`, `blog`, or `nitter` |
+| `source_type` | TEXT | `rss`, `blog`, `nitter`, or `bookmark` |
 | `created_at` | DATETIME | When the feed was added |
 | `last_fetched_at` | DATETIME | Last successful fetch time |
+
+**Sentinel feed row:** At DB bootstrap, a reserved feed row is inserted once (idempotent) with `id = 1` (`BOOKMARK_FEED_ID`), `title = "Saved Articles"`, `feed_url = "bookmark://saved"`, `source_type = "bookmark"`. This row is undeletable and acts as the parent for all bookmark articles, preserving the `feed_id NOT NULL` FK constraint with no schema changes.
 
 ### articles
 
@@ -70,13 +73,33 @@ The CLI never touches the database directly — all reads and writes go through 
 |--------|------|---------|
 | `POST` | `/feeds` | Add a feed (auto-detects source type from URL) |
 | `GET` | `/feeds` | List all subscribed feeds |
-| `DELETE` | `/feeds/{id}` | Remove a feed |
-| `POST` | `/feeds/{id}/fetch` | Fetch new articles for one feed |
-| `POST` | `/feeds/fetch` | Fetch new articles for all feeds |
-| `GET` | `/articles` | List articles (query params: `feed_id`, `state`) |
+| `DELETE` | `/feeds/{id}` | Remove a feed (returns 403 if `id == BOOKMARK_FEED_ID`) |
+| `POST` | `/feeds/{id}/fetch` | Fetch new articles for one feed (skips feeds with `source_type == 'bookmark'`) |
+| `POST` | `/feeds/fetch` | Fetch new articles for all feeds (skips feeds with `source_type == 'bookmark'`) |
+| `POST` | `/articles` | Save a standalone URL as a bookmark article (see below) |
+| `GET` | `/articles` | List articles (query params: `feed_id`, `state`, `source`) |
 | `GET` | `/articles/{id}` | Get article detail (all fields) |
 | `GET` | `/articles/{id}/markdown` | Get article content rendered as markdown |
 | `PATCH` | `/articles/{id}` | Update article state |
+
+### POST /articles — Save a bookmark
+
+**Request:** `{ "url": "https://..." }`
+
+**Processing flow:**
+1. Validate URL scheme (must be `http` or `https`) → 422 if not
+2. Check for duplicate URL → 409 with `{ "id": <existing_article_id> }` if already saved
+3. Fetch page via `httpx.AsyncClient` (timeout=15s, follow redirects) → 422 on network/HTTP failure
+4. Extract content: `trafilatura.extract(html, output_format="html")`
+5. Extract metadata: `trafilatura.extract_metadata(html)` — title, author, date
+6. Convert HTML to markdown via `markdownify`
+7. Generate summary from first 300 chars of plain-text extraction
+8. Insert article with `feed_id = BOOKMARK_FEED_ID`
+9. Return full article object → 201 (if no content was extracted, store with empty content and include a `"warning"` field in the response)
+
+### GET /articles — `source` query param
+
+`source=bookmark` filters results to `WHERE feed_id = BOOKMARK_FEED_ID`. Omitting `source` returns all articles (no behavior change). The `source` param is mutually exclusive with `feed_id`.
 
 ---
 
@@ -88,7 +111,8 @@ The CLI never touches the database directly — all reads and writes go through 
 | `reader feeds` | List all subscribed feeds |
 | `reader remove <feed_id>` | Remove a feed |
 | `reader fetch [feed_id]` | Fetch new articles (all feeds if no ID given) |
-| `reader articles [--feed <id>] [--state unread]` | List articles with optional filters |
+| `reader save <url>` | Save a standalone URL as a bookmark article (validates `http`/`https` prefix; prints `Saved article #<id>: <title>` on 201, `Already saved as article #<id>` on 409, error on 422) |
+| `reader articles [--feed <id>] [--state <state>] [--saved]` | List articles with optional filters (`--saved` filters to bookmarks; mutually exclusive with `--feed`; "Feed" column shows `"Saved"` for bookmark articles) |
 | `reader read <article_id>` | Render article as markdown in the terminal (via `rich`) |
 | `reader mark <article_id> <state>` | Set article state (`read`, `unread`, `read_again`) |
 

@@ -1,0 +1,101 @@
+post:
+  summary: Save a bookmark article
+  description: |
+    Saves a standalone URL as a bookmark article under the sentinel "Saved
+    Articles" feed (id=1).
+
+    **Processing flow:**
+    1. Validate URL scheme (must be `http` or `https`) → 422 if not.
+    2. Check for duplicate URL → 409 with `{ "id": <existing_article_id> }` if
+       already saved.
+    3. Fetch the page via httpx (timeout=15s, follow redirects) → 422 on
+       network/HTTP failure.
+    4. Extract content with trafilatura; convert to markdown via markdownify.
+    5. Generate summary from first 300 characters of plain-text extraction.
+    6. Store article and return 201.
+
+    If no content could be extracted the article is still stored and the
+    response includes a `"warning"` field.
+  operationId: saveArticle
+  tags: [Articles]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/ArticleSave.yaml"
+  responses:
+    "201":
+      description: Article saved.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Article.yaml"
+    "409":
+      description: Article with this URL already exists.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the existing article.
+            required: [id]
+    "422":
+      description: >
+        Invalid URL scheme, network failure, or HTTP error while fetching the
+        page.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+
+get:
+  summary: List articles
+  description: >
+    Returns articles filtered by the provided query parameters. The `source`
+    and `feed_id` parameters are mutually exclusive — supplying both yields a
+    422 error.
+  operationId: listArticles
+  tags: [Articles]
+  parameters:
+    - name: feed_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: >
+        Filter to articles belonging to a specific feed. Mutually exclusive
+        with `source`.
+    - name: state
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [unread, read, read_again]
+      description: Filter to articles with the given reading state.
+    - name: source
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [bookmark]
+      description: >
+        Filter to bookmark articles (feed_id = 1). Mutually exclusive with
+        `feed_id`.
+  responses:
+    "200":
+      description: Array of articles matching the filters.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../components/schemas/Article.yaml"
+    "422":
+      description: Both `source` and `feed_id` were supplied.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

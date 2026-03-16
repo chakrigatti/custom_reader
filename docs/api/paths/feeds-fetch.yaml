@@ -1,0 +1,17 @@
+post:
+  summary: Fetch new articles for all feeds
+  description: >
+    Fetches and stores new articles for every subscribed feed. Feeds with
+    source_type "bookmark" are silently skipped. Deduplicates by URL so
+    re-fetching does not create duplicate articles.
+  operationId: fetchAllFeeds
+  tags: [Feeds]
+  responses:
+    "200":
+      description: Fetch completed for all non-bookmark feeds.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../components/schemas/FetchResult.yaml"

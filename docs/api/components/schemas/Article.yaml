@@ -1,0 +1,50 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: Auto-increment primary key.
+  feed_id:
+    type: integer
+    description: Foreign key referencing feeds.id.
+  title:
+    type: string
+    description: Article title.
+  url:
+    type: string
+    format: uri
+    description: Canonical article URL (unique).
+  author:
+    type: string
+    nullable: true
+    description: Author name.
+  content_html:
+    type: string
+    description: Raw HTML content.
+  content_markdown:
+    type: string
+    description: Converted markdown content.
+  summary:
+    type: string
+    nullable: true
+    description: Short excerpt or feed-provided summary.
+  published_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: Publication date from feed.
+  fetched_at:
+    type: string
+    format: date-time
+    description: When the article was fetched.
+  state:
+    type: string
+    enum: [unread, read, read_again]
+    description: Reading state (default unread).
+  warning:
+    type: string
+    nullable: true
+    description: >
+      Present when the article was saved but no content could be extracted
+      (e.g. paywalled or JS-rendered page). Only included in responses when
+      non-null.
+required: [id, feed_id, title, url, content_html, content_markdown, fetched_at, state]

@@ -1,0 +1,30 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: Auto-increment primary key.
+  title:
+    type: string
+    description: Feed title.
+  feed_url:
+    type: string
+    format: uri
+    description: Resolved RSS/Atom URL (unique).
+  site_url:
+    type: string
+    format: uri
+    description: Original site homepage URL.
+  source_type:
+    type: string
+    enum: [rss, blog, nitter, bookmark]
+    description: How the feed was added.
+  created_at:
+    type: string
+    format: date-time
+    description: When the feed was added.
+  last_fetched_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: Last successful fetch time.
+required: [id, title, feed_url, site_url, source_type, created_at]

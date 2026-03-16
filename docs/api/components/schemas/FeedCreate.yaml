@@ -1,0 +1,11 @@
+type: object
+properties:
+  url:
+    type: string
+    format: uri
+    description: >
+      URL of the feed or site to add. The server auto-detects the source type:
+      RSS/Atom feed URLs are used directly, blog homepages are crawled for feed
+      discovery, and X/Twitter handles or nitter URLs are converted to nitter
+      RSS URLs.
+required: [url]
