@@ -1,119 +1,119 @@
-# RSS Feed Reader — Feature Document
+# Custom RSS Reader — Requirements (v1)
 
-## Overview
+## 1. Overview & Goals
 
-A personal feed reader that aggregates blog posts from various sources and provides a unified reading experience. Available as both a CLI tool and a web application, sharing the same local database.
-
----
-
-## Goals
-
-- Subscribe to blogs, RSS/Atom feeds, and X (Twitter) accounts from one place
-- Get notified of new posts across all subscriptions
-- Read full articles within the app (no need to open a browser)
-- Track reading progress with flexible article states
+A personal RSS reader built for the command line. It aggregates articles from RSS/Atom feeds, blog URLs, and X/Twitter accounts (via Nitter), stores them locally in SQLite, and lets you read full articles rendered as markdown in the terminal. A FastAPI server acts as the single source of truth; the CLI is a thin HTTP client that talks to it.
 
 ---
 
-## Sources
+## 2. Architecture
 
-| Source Type | How It Works |
-|-------------|-------------|
-| RSS/Atom feeds | Subscribe directly by feed URL |
-| Blog URLs | Auto-discover RSS feed from the blog's HTML page |
-| X (Twitter) | Use nitter instances to get RSS feeds for X accounts |
+```
+CLI (click + httpx)
+        ↓ HTTP
+FastAPI server
+        ↓
+   Service layer (Python)
+        ↓
+  SQLite database
+```
 
-**Newsletters** — dropped for now, may revisit later.
-
-### RSS Auto-Discovery
-When given a plain blog URL (not a feed URL):
-1. Fetch the page and look for `<link rel="alternate">` tags pointing to RSS/Atom
-2. Try common feed paths (`/feed`, `/rss`, `/atom.xml`, `/feed.xml`, `/index.xml`)
-3. Subscribe to the first valid feed found
-
-### Nitter for X/Twitter
-- Convert an X handle to a nitter RSS URL
-- Maintain a configurable list of nitter instances (they go down often)
-- Automatically fall back to the next available instance
+The CLI never touches the database directly — all reads and writes go through the REST API.
 
 ---
 
-## Interfaces
+## 3. Source Types (v1)
 
-### CLI
-- Command-based interface (e.g., `feedreader add <url>`, `feedreader posts`)
-- Full articles rendered as markdown in the terminal using the `rich` library
-- All feed management, fetching, reading, and article state changes via commands
-
-### Web UI
-- Built with FastAPI + Jinja2 templates
-- Feed management (add/remove subscriptions)
-- Article list with filtering by feed, state, and date
-- Clean reader-mode view for full articles
-- Reminder queue page
-
-**Both interfaces share the same SQLite database**, so you can switch between them freely.
+| Type | Input | How |
+|------|-------|-----|
+| RSS/Atom | Feed URL | feedparser directly |
+| Blog URL | Homepage URL | beautifulsoup4 auto-discovery via `<link rel="alternate">` + common paths (`/feed`, `/rss`, `/atom.xml`, `/feed.xml`, `/index.xml`) |
+| X/Twitter | Handle or nitter URL | Convert to nitter RSS URL (single configurable instance, no fallback in v1) |
 
 ---
 
-## Article States
+## 4. Data Model
 
-Each article has one of these states:
+### feeds
 
-| State | Meaning |
-|-------|---------|
-| **Unread** | New article, not yet read (default) |
-| **Read** | Article has been read |
-| **Read Again** | Finished reading but want to revisit later |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `title` | TEXT | Feed title |
+| `feed_url` | TEXT UNIQUE | Resolved RSS/Atom URL |
+| `site_url` | TEXT | Original site homepage |
+| `source_type` | TEXT | `rss`, `blog`, or `nitter` |
+| `created_at` | DATETIME | When the feed was added |
+| `last_fetched_at` | DATETIME | Last successful fetch time |
 
----
+### articles
 
-## Timed Reminders
-
-- Any article can be marked with a "remind later" duration (e.g., "3 days", "1 week", "12 hours")
-- The app stores a future timestamp for when the article should resurface
-- Reminded articles appear in a dedicated "remind" view once the time arrives
-- Available in both CLI (`feedreader posts --remind`) and web UI (Remind Queue page)
-
----
-
-## Feed Management
-
-- **Add** a feed by RSS URL, blog URL, or X handle
-- **List** all subscribed feeds with title, URL, and last fetch time
-- **Remove** a feed (articles already fetched are retained)
-- **Fetch** new posts from all feeds or a specific feed on demand
-
----
-
-## Technology Choices
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Language | Python | User preference |
-| Database | SQLite | Simple, local, no server needed |
-| CLI framework | click or typer | Clean command structure |
-| Terminal rendering | rich | Markdown rendering in terminal |
-| Web framework | FastAPI + Jinja2 | Lightweight, async, good DX |
-| Feed parsing | feedparser | Mature RSS/Atom parser |
-| HTTP client | httpx | Async support for fetching |
-| Content extraction | readability-lxml or trafilatura | Extract clean article content from HTML |
-| RSS discovery | beautifulsoup4 | Parse HTML to find feed links |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `feed_id` | INTEGER FK | References `feeds.id` |
+| `title` | TEXT | Article title |
+| `url` | TEXT UNIQUE | Canonical article URL |
+| `author` | TEXT | Author name (nullable) |
+| `content_html` | TEXT | Raw HTML content |
+| `content_markdown` | TEXT | Converted markdown (via markdownify + trafilatura) |
+| `summary` | TEXT | Short excerpt or feed-provided summary |
+| `published_at` | DATETIME | Publication date from feed |
+| `fetched_at` | DATETIME | When the article was fetched |
+| `state` | TEXT | `unread`, `read`, or `read_again` (default: `unread`) |
 
 ---
 
-## Data Model
+## 5. REST API Endpoints
 
-### Feeds
-- Title, feed URL, original site URL
-- Source type (rss, blog, nitter)
-- Timestamps for when added and last fetched
-
-### Articles
-- Title, URL, author, full content (HTML), summary
-- Publication date, fetch date
-- Current state (unread / read / read_again)
-- Optional remind-at timestamp for timed reminders
-- Link back to parent feed
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/feeds` | Add a feed (auto-detects source type from URL) |
+| `GET` | `/feeds` | List all subscribed feeds |
+| `DELETE` | `/feeds/{id}` | Remove a feed |
+| `POST` | `/feeds/{id}/fetch` | Fetch new articles for one feed |
+| `POST` | `/feeds/fetch` | Fetch new articles for all feeds |
+| `GET` | `/articles` | List articles (query params: `feed_id`, `state`) |
+| `GET` | `/articles/{id}` | Get article detail (all fields) |
+| `GET` | `/articles/{id}/markdown` | Get article content rendered as markdown |
+| `PATCH` | `/articles/{id}` | Update article state |
 
 ---
+
+## 6. CLI Commands
+
+| Command | Purpose |
+|---------|---------|
+| `reader add <url>` | Add a feed (auto-detects type: RSS, blog, or X handle/nitter URL) |
+| `reader feeds` | List all subscribed feeds |
+| `reader remove <feed_id>` | Remove a feed |
+| `reader fetch [feed_id]` | Fetch new articles (all feeds if no ID given) |
+| `reader articles [--feed <id>] [--state unread]` | List articles with optional filters |
+| `reader read <article_id>` | Render article as markdown in the terminal (via `rich`) |
+| `reader mark <article_id> <state>` | Set article state (`read`, `unread`, `read_again`) |
+
+---
+
+## 7. Tech Stack
+
+| Layer | Choice | Reason |
+|-------|--------|--------|
+| Language | Python 3.11+ | User preference |
+| API framework | FastAPI + uvicorn | Async, auto-docs, clean DX |
+| Database | SQLite | Local, no server, simple |
+| CLI | click + httpx | Thin HTTP client to the API |
+| Feed parsing | feedparser | Mature RSS/Atom support |
+| HTTP fetching | httpx | Async, used for both feed fetching and article content |
+| HTML → Markdown | markdownify | Clean HTML-to-markdown conversion |
+| Content extraction | trafilatura | Strips boilerplate, extracts main article content |
+| RSS discovery | beautifulsoup4 | Parses `<link rel="alternate">` tags from blog HTML |
+| Terminal rendering | rich | Renders markdown in the terminal |
+
+---
+
+## 8. V2 Backlog (deferred)
+
+- **Timed reminders / snooze** — mark an article to resurface after N days/hours
+- **Nitter instance fallback** — auto-retry list when the configured instance is down
+- **Full-text search** — SQLite FTS5 across article titles and content
+- **Web UI** — browser-based interface built on top of the same REST API
