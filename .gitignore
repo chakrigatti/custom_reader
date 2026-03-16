@@ -16,3 +16,5 @@ build/
 
 # IDE
 .claude/
+.reader-pids
+node_modules/
