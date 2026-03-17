@@ -1,0 +1,25 @@
+get:
+  summary: Export feeds as OPML
+  description: >
+    Returns all subscribed feeds as an OPML 2.0 XML document. Feeds with
+    categories are nested under folder outlines.
+  operationId: exportOPML
+  tags: [OPML]
+  responses:
+    "200":
+      description: OPML XML document.
+      headers:
+        Content-Disposition:
+          description: Attachment filename.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            type: string
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

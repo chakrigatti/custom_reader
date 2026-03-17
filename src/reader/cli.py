@@ -127,7 +127,8 @@ def save(url: str):
 @click.option("--feed", "feed_id", type=int, help="Filter by feed ID")
 @click.option("--state", type=click.Choice(["unread", "read", "read_again"]))
 @click.option("--saved", is_flag=True, help="Show only bookmarked articles")
-def articles(feed_id: Optional[int], state: Optional[str], saved: bool):
+@click.option("--tag", type=str, help="Filter by tag name")
+def articles(feed_id: Optional[int], state: Optional[str], saved: bool, tag: Optional[str]):
     """List articles with optional filters."""
     with get_client() as client:
         params = {}
@@ -137,6 +138,8 @@ def articles(feed_id: Optional[int], state: Optional[str], saved: bool):
             params["state"] = state
         if saved:
             params["source"] = "bookmark"
+        if tag:
+            params["tag"] = tag
 
         response = client.get("/articles", params=params)
         handle_error(response)
@@ -190,3 +193,120 @@ def mark(article_id: int, state: str):
         )
         handle_error(response)
         console.print("Marked article #{} as {}".format(article_id, state))
+
+
+@cli.command()
+def categories():
+    """List all categories."""
+    with get_client() as client:
+        response = client.get("/categories")
+        handle_error(response)
+        data = response.json()
+
+        table = Table(title="Categories")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name")
+        table.add_column("Created")
+
+        for cat in data["data"]:
+            table.add_row(
+                str(cat["id"]),
+                cat["name"],
+                cat.get("created_at", ""),
+            )
+        console.print(table)
+
+
+@cli.command()
+@click.argument("feed_id", type=int)
+@click.argument("category", type=str)
+def categorize(feed_id: int, category: str):
+    """Assign a feed to a category."""
+    with get_client() as client:
+        # Get current feed categories
+        response = client.get("/feeds/{}".format(feed_id))
+        handle_error(response)
+        feed = response.json()
+        existing_ids = [c["id"] for c in feed.get("categories", [])]
+
+        # Create or find category
+        cat_response = client.get("/categories")
+        handle_error(cat_response)
+        cats = cat_response.json()["data"]
+        cat_id = None
+        for c in cats:
+            if c["name"] == category:
+                cat_id = c["id"]
+                break
+
+        if cat_id is None:
+            create_resp = client.post("/categories", json={"name": category})
+            handle_error(create_resp)
+            cat_id = create_resp.json()["id"]
+
+        if cat_id not in existing_ids:
+            existing_ids.append(cat_id)
+
+        response = client.put(
+            "/feeds/{}/categories".format(feed_id),
+            json={"category_ids": existing_ids},
+        )
+        handle_error(response)
+        console.print(
+            "Feed #{} categorized as '{}'".format(feed_id, category)
+        )
+
+
+@cli.command(name="tag")
+@click.argument("article_id", type=int)
+@click.argument("tag_name", type=str)
+def tag_article(article_id: int, tag_name: str):
+    """Tag an article."""
+    with get_client() as client:
+        response = client.post(
+            "/articles/{}/tags".format(article_id),
+            json={"name": tag_name},
+        )
+        handle_error(response)
+        console.print(
+            "Tagged article #{} with '{}'".format(article_id, tag_name)
+        )
+
+
+@cli.command(name="import")
+@click.argument("file", type=click.Path(exists=True))
+def import_opml(file: str):
+    """Import feeds from an OPML file."""
+    with open(file, "rb") as f:
+        content = f.read()
+
+    with get_client() as client:
+        response = client.post(
+            "/opml/import",
+            files={"file": ("feeds.opml", content, "application/xml")},
+        )
+        handle_error(response)
+        result = response.json()
+        console.print(
+            "Imported: {}, Skipped: {}, Errors: {}".format(
+                result["imported"], result["skipped"], len(result["errors"])
+            )
+        )
+        for err in result["errors"]:
+            console.print("[yellow]  {}[/yellow]".format(err))
+
+
+@cli.command(name="export")
+@click.option("--output", "-o", type=click.Path(), help="Output file path")
+def export_opml(output: Optional[str]):
+    """Export feeds as OPML."""
+    with get_client() as client:
+        response = client.get("/opml/export")
+        handle_error(response)
+
+        if output:
+            with open(output, "w") as f:
+                f.write(response.text)
+            console.print("Exported to {}".format(output))
+        else:
+            console.print(response.text)

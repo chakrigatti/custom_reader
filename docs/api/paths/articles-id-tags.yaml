@@ -1,0 +1,36 @@
+post:
+  summary: Add a tag to an article
+  operationId: addTagToArticle
+  tags: [Tags]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Article ID.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/TagCreate.yaml"
+  responses:
+    "200":
+      description: Article with updated tags.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Article.yaml"
+    "404":
+      description: Article not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

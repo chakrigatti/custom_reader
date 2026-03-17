@@ -1,0 +1,10 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: "./Category.yaml"
+  total:
+    type: integer
+    description: Total number of categories.
+required: [data, total]

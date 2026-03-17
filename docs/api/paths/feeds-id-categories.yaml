@@ -1,0 +1,38 @@
+put:
+  summary: Set feed categories
+  description: >
+    Replaces all category associations for the feed with the given category IDs.
+  operationId: setFeedCategories
+  tags: [Feeds]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Feed ID.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/FeedCategoryUpdate.yaml"
+  responses:
+    "200":
+      description: Feed with updated categories.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Feed.yaml"
+    "404":
+      description: Feed or category not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

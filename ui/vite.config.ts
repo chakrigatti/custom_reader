@@ -12,6 +12,9 @@ export default defineConfig({
       "/feeds": "http://127.0.0.1:8000",
       "/articles": "http://127.0.0.1:8000",
       "/sync": "http://127.0.0.1:8000",
+      "/categories": "http://127.0.0.1:8000",
+      "/tags": "http://127.0.0.1:8000",
+      "/opml": "http://127.0.0.1:8000",
     },
   },
 });

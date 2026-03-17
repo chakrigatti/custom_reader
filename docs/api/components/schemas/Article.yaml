@@ -62,6 +62,12 @@ properties:
     description: >
       Present when the article was saved but no content could be extracted
       (e.g. paywalled or JS-rendered page). Omitted when there is no warning.
+  tags:
+    type: array
+    readOnly: true
+    items:
+      $ref: "./Tag.yaml"
+    description: Tags applied to this article.
 required: [id, feed_id, title, url, content_html, content_markdown, fetched_at, state]
 example:
   id: 42

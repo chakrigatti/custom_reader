@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>Test Subscriptions</title>
+  </head>
+  <body>
+    <outline text="Technology" title="Technology">
+      <outline type="rss" text="TechCrunch" title="TechCrunch" xmlUrl="https://techcrunch.com/feed/" htmlUrl="https://techcrunch.com"/>
+      <outline type="rss" text="Ars Technica" title="Ars Technica" xmlUrl="https://feeds.arstechnica.com/arstechnica/features" htmlUrl="https://arstechnica.com"/>
+    </outline>
+    <outline text="Science" title="Science">
+      <outline type="rss" text="Nature News" title="Nature News" xmlUrl="https://www.nature.com/nature.rss" htmlUrl="https://www.nature.com"/>
+    </outline>
+    <outline type="rss" text="xkcd" title="xkcd" xmlUrl="https://xkcd.com/rss.xml" htmlUrl="https://xkcd.com"/>
+  </body>
+</opml>

@@ -1,0 +1,36 @@
+delete:
+  summary: Remove a tag from an article
+  operationId: removeTagFromArticle
+  tags: [Tags]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Article ID.
+    - name: tag_id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Tag ID.
+  responses:
+    "200":
+      description: Article with updated tags.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Article.yaml"
+    "404":
+      description: Article or tag not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

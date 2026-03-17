@@ -1,0 +1,14 @@
+type: object
+properties:
+  imported:
+    type: integer
+    description: Number of feeds successfully imported.
+  skipped:
+    type: integer
+    description: Number of feeds skipped (already exist).
+  errors:
+    type: array
+    items:
+      type: string
+    description: Per-feed error messages for feeds that failed to import.
+required: [imported, skipped, errors]

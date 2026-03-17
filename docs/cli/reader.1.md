@@ -44,6 +44,21 @@ using any command.
 **mark** *article_id* *state*
 : Set an article's reading state. See **reader-mark**(1).
 
+**categories**
+: List all categories. See **reader-categories**(1).
+
+**categorize** *feed_id* *category*
+: Assign a feed to a category. See **reader-categorize**(1).
+
+**tag** *article_id* *tag_name*
+: Tag an article. See **reader-tag**(1).
+
+**import** *file*
+: Import feeds from an OPML file. See **reader-import**(1).
+
+**export** [--output *file*]
+: Export feeds as OPML. See **reader-export**(1).
+
 # OPTIONS
 
 **--help**
@@ -71,4 +86,6 @@ Start the API server, then run commands:
 
 **reader-add**(1), **reader-feeds**(1), **reader-remove**(1),
 **reader-fetch**(1), **reader-save**(1), **reader-articles**(1),
-**reader-read**(1), **reader-mark**(1)
+**reader-read**(1), **reader-mark**(1), **reader-categories**(1),
+**reader-categorize**(1), **reader-tag**(1), **reader-import**(1),
+**reader-export**(1)

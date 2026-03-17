@@ -6,6 +6,7 @@ import { showToast } from "./toast";
 
 export interface ArticleListCallbacks {
   onSelectArticle: (id: number) => void;
+  onSelectTag: (name: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -72,10 +73,16 @@ function render(): void {
   const rows = articles.map((a) => {
     const unread = a.state === "unread" ? "article-row--unread" : "";
     const stateLabel = a.state === "read_again" ? "re-read" : a.state;
+    const tagPills = (a.tags || [])
+      .map((t) => `<span class="tag-pill" data-tag-name="${escapeAttr(t.name)}">${escapeHtml(t.name)}</span>`)
+      .join("");
     return `<div class="article-row ${unread}" data-id="${a.id}">
       <div class="article-row-main">
         <span class="article-title">${escapeHtml(a.title)}</span>
-        <span class="article-meta">${relativeTime(a.published_at)}</span>
+        <div class="article-row-meta">
+          <span class="article-meta">${relativeTime(a.published_at)}</span>
+          ${tagPills ? `<span class="article-tags">${tagPills}</span>` : ""}
+        </div>
       </div>
       <div class="article-row-sub">
         <button class="btn-state" data-id="${a.id}" data-state="${a.state}" title="Mark as ${NEXT_STATE[a.state]}">${stateLabel}</button>
@@ -91,12 +98,23 @@ function render(): void {
 
   container.querySelectorAll(".article-row").forEach((row) => {
     row.addEventListener("click", (e) => {
-      if ((e.target as HTMLElement).classList.contains("btn-state")) return;
+      const target = e.target as HTMLElement;
+      if (target.classList.contains("btn-state")) return;
+      if (target.classList.contains("tag-pill")) return;
       callbacks.onSelectArticle(Number((row as HTMLElement).dataset.id));
     });
   });
 
   container.querySelector(".load-more")?.addEventListener("click", loadMore);
+
+  // Tag pill clicks → filter by tag
+  container.querySelectorAll(".tag-pill").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const name = (el as HTMLElement).dataset.tagName!;
+      callbacks.onSelectTag(name);
+    });
+  });
 
   container.querySelectorAll(".btn-state").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
@@ -128,4 +146,8 @@ function escapeHtml(s: string): string {
   const div = document.createElement("div");
   div.textContent = s;
   return div.innerHTML;
+}
+
+function escapeAttr(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

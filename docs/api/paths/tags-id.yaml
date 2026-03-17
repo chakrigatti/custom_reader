@@ -1,0 +1,26 @@
+delete:
+  summary: Delete a tag
+  operationId: deleteTag
+  tags: [Tags]
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Tag ID.
+  responses:
+    "204":
+      description: Tag deleted.
+    "404":
+      description: Tag not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

@@ -40,6 +40,17 @@ properties:
     readOnly: true
     description: Timestamp of the last successful sync. Null if never synced.
     example: "2024-03-10T14:22:00Z"
+  favicon_url:
+    type: [string, 'null']
+    format: uri
+    readOnly: true
+    description: URL to the site's favicon. Null if not available.
+  categories:
+    type: array
+    readOnly: true
+    items:
+      $ref: "./Category.yaml"
+    description: Categories this feed belongs to.
 required: [id, title, feed_url, site_url, source_type, created_at]
 example:
   id: 3

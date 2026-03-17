@@ -1,5 +1,10 @@
 export type ArticleState = "unread" | "read" | "read_again";
 
+export interface Tag {
+  id: number;
+  name: string;
+}
+
 export interface Article {
   id: number;
   feed_id: number;
@@ -13,6 +18,7 @@ export interface Article {
   fetched_at: string;
   state: ArticleState;
   warning?: string | null;
+  tags: Tag[];
 }
 
 export const NEXT_STATE: Record<ArticleState, ArticleState> = {

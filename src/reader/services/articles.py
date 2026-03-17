@@ -6,9 +6,10 @@ from urllib.parse import urlparse
 import httpx
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from reader.errors import bad_gateway, conflict, not_found, unprocessable
-from reader.models.db import Article
+from reader.models.db import Article, FeedCategory, Tag
 from reader.models.schemas import ArticleList, ArticleResponse
 from reader.services.content import extract_content
 
@@ -54,6 +55,13 @@ async def save_bookmark(db: AsyncSession, url: str) -> ArticleResponse:
     db.add(article)
     await db.commit()
     await db.refresh(article)
+    # Re-load with tags
+    result = await db.execute(
+        select(Article)
+        .where(Article.id == article.id)
+        .options(selectinload(Article.tags))
+    )
+    article = result.scalar_one()
     return ArticleResponse.model_validate(article)
 
 
@@ -64,11 +72,13 @@ async def list_articles(
     source: Optional[str],
     limit: int,
     offset: int,
+    tag: Optional[str] = None,
+    category_id: Optional[int] = None,
 ) -> ArticleList:
     if source and feed_id:
         raise unprocessable("Cannot specify both 'source' and 'feed_id'")
 
-    query = select(Article)
+    query = select(Article).options(selectinload(Article.tags))
     count_query = select(func.count(Article.id))
 
     if feed_id is not None:
@@ -80,6 +90,21 @@ async def list_articles(
     if source == "bookmark":
         query = query.where(Article.feed_id == 1)
         count_query = count_query.where(Article.feed_id == 1)
+    if tag:
+        from reader.models.db import ArticleTag
+        query = query.join(ArticleTag, Article.id == ArticleTag.article_id).join(
+            Tag, ArticleTag.tag_id == Tag.id
+        ).where(Tag.name == tag)
+        count_query = count_query.join(
+            ArticleTag, Article.id == ArticleTag.article_id
+        ).join(Tag, ArticleTag.tag_id == Tag.id).where(Tag.name == tag)
+    if category_id is not None:
+        query = query.join(
+            FeedCategory, Article.feed_id == FeedCategory.feed_id
+        ).where(FeedCategory.category_id == category_id)
+        count_query = count_query.join(
+            FeedCategory, Article.feed_id == FeedCategory.feed_id
+        ).where(FeedCategory.category_id == category_id)
 
     total_result = await db.execute(count_query)
     total = total_result.scalar_one()
@@ -87,7 +112,7 @@ async def list_articles(
     result = await db.execute(
         query.order_by(Article.id.desc()).limit(limit).offset(offset)
     )
-    articles = result.scalars().all()
+    articles = result.scalars().unique().all()
 
     return ArticleList(
         data=[ArticleResponse.model_validate(a) for a in articles],
@@ -99,7 +124,9 @@ async def list_articles(
 
 async def get_article(db: AsyncSession, article_id: int) -> Article:
     result = await db.execute(
-        select(Article).where(Article.id == article_id)
+        select(Article)
+        .where(Article.id == article_id)
+        .options(selectinload(Article.tags))
     )
     article = result.scalar_one_or_none()
     if not article:
@@ -114,4 +141,11 @@ async def update_article_state(
     article.state = state
     await db.commit()
     await db.refresh(article)
+    # Re-load with tags
+    result = await db.execute(
+        select(Article)
+        .where(Article.id == article.id)
+        .options(selectinload(Article.tags))
+    )
+    article = result.scalar_one()
     return ArticleResponse.model_validate(article)

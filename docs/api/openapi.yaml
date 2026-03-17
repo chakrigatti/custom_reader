@@ -2,7 +2,7 @@ openapi: "3.1.0"
 
 info:
   title: Reader API
-  version: "1.0.0"
+  version: "2.0.0"
   description: >
     REST API for the custom RSS reader CLI app. The CLI is a thin HTTP client;
     all reads and writes go through this API, which persists data in a local
@@ -26,12 +26,30 @@ paths:
     $ref: "./paths/feeds-id.yaml"
   /feeds/{id}/sync:
     $ref: "./paths/feeds-id-sync.yaml"
+  /feeds/{id}/categories:
+    $ref: "./paths/feeds-id-categories.yaml"
   /sync:
     $ref: "./paths/sync.yaml"
   /articles:
     $ref: "./paths/articles.yaml"
   /articles/{id}:
     $ref: "./paths/articles-id.yaml"
+  /articles/{id}/tags:
+    $ref: "./paths/articles-id-tags.yaml"
+  /articles/{id}/tags/{tag_id}:
+    $ref: "./paths/articles-id-tags-id.yaml"
+  /categories:
+    $ref: "./paths/categories.yaml"
+  /categories/{id}:
+    $ref: "./paths/categories-id.yaml"
+  /tags:
+    $ref: "./paths/tags.yaml"
+  /tags/{id}:
+    $ref: "./paths/tags-id.yaml"
+  /opml/import:
+    $ref: "./paths/opml-import.yaml"
+  /opml/export:
+    $ref: "./paths/opml-export.yaml"
 
 components:
   schemas:
@@ -55,3 +73,21 @@ components:
       $ref: "./components/schemas/ArticleList.yaml"
     SyncResultList:
       $ref: "./components/schemas/SyncResultList.yaml"
+    Category:
+      $ref: "./components/schemas/Category.yaml"
+    CategoryCreate:
+      $ref: "./components/schemas/CategoryCreate.yaml"
+    CategoryUpdate:
+      $ref: "./components/schemas/CategoryUpdate.yaml"
+    CategoryList:
+      $ref: "./components/schemas/CategoryList.yaml"
+    FeedCategoryUpdate:
+      $ref: "./components/schemas/FeedCategoryUpdate.yaml"
+    Tag:
+      $ref: "./components/schemas/Tag.yaml"
+    TagCreate:
+      $ref: "./components/schemas/TagCreate.yaml"
+    TagList:
+      $ref: "./components/schemas/TagList.yaml"
+    OPMLImportResult:
+      $ref: "./components/schemas/OPMLImportResult.yaml"

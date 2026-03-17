@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from reader.database import init_db
 from reader.errors import APIError, api_error_handler, validation_error_handler
-from reader.routes import articles, feeds, sync
+from reader.routes import articles, categories, feeds, opml, sync, tags
 
 STATIC_DIR = pathlib.Path(__file__).resolve().parent.parent.parent / "static"
 
@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Reader API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Reader API", version="2.0.0", lifespan=lifespan)
 
 app.add_exception_handler(APIError, api_error_handler)
 app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -27,6 +27,9 @@ app.add_exception_handler(RequestValidationError, validation_error_handler)
 app.include_router(feeds.router)
 app.include_router(articles.router)
 app.include_router(sync.router)
+app.include_router(categories.router)
+app.include_router(tags.router)
+app.include_router(opml.router)
 
 
 @app.get("/")

@@ -10,6 +10,43 @@ class FeedCreate(BaseModel):
     url: HttpUrl
 
 
+class CategoryCreate(BaseModel):
+    name: str
+
+
+class CategoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    created_at: datetime
+
+
+class CategoryList(BaseModel):
+    data: List[CategoryResponse]
+    total: int
+
+
+class FeedCategoryUpdate(BaseModel):
+    category_ids: List[int]
+
+
+class TagCreate(BaseModel):
+    name: str
+
+
+class TagResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class TagList(BaseModel):
+    data: List[TagResponse]
+    total: int
+
+
 class FeedResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,8 +55,10 @@ class FeedResponse(BaseModel):
     feed_url: str
     site_url: str
     source_type: str
+    favicon_url: Optional[str] = None
     created_at: datetime
     last_fetched_at: Optional[datetime] = None
+    categories: List[CategoryResponse] = []
 
 
 class FeedList(BaseModel):
@@ -52,6 +91,7 @@ class ArticleResponse(BaseModel):
     fetched_at: datetime
     state: str
     warning: Optional[str] = None
+    tags: List[TagResponse] = []
 
 
 class ArticleList(BaseModel):
@@ -70,6 +110,12 @@ class FetchResult(BaseModel):
 class SyncResultList(BaseModel):
     data: List[FetchResult]
     total: int
+
+
+class OPMLImportResult(BaseModel):
+    imported: int
+    skipped: int
+    errors: List[str]
 
 
 class ProblemDetail(BaseModel):

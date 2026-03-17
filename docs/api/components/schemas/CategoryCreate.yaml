@@ -1,0 +1,8 @@
+type: object
+properties:
+  name:
+    type: string
+    minLength: 1
+    description: Category name. Must be unique.
+    example: "Technology"
+required: [name]

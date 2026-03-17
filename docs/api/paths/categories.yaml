@@ -1,0 +1,53 @@
+post:
+  summary: Create a category
+  operationId: createCategory
+  tags: [Categories]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/CategoryCreate.yaml"
+  responses:
+    "201":
+      description: Category created.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Category.yaml"
+    "409":
+      description: Category with this name already exists.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "422":
+      description: Invalid request body.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+
+get:
+  summary: List all categories
+  operationId: listCategories
+  tags: [Categories]
+  responses:
+    "200":
+      description: List of categories.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/CategoryList.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

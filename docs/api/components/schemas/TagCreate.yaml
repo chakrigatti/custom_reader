@@ -1,0 +1,8 @@
+type: object
+properties:
+  name:
+    type: string
+    minLength: 1
+    description: Tag name. Created on-the-fly if it doesn't exist.
+    example: "python"
+required: [name]

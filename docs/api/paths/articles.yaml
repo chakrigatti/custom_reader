@@ -109,6 +109,18 @@ get:
         enum: [bookmark]
       description: >
         Filter to bookmark articles. Mutually exclusive with `feed_id`.
+    - name: tag
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter to articles with this tag name.
+    - name: category_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filter to articles from feeds in this category.
     - name: limit
       in: query
       required: false

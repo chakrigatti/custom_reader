@@ -29,6 +29,9 @@ that belong to the "Saved Articles" feed.
 : Filter to bookmark articles only (articles saved with **reader-save**(1)).
   Mutually exclusive with **--feed**.
 
+**--tag** *name*
+: Filter to articles with the given tag.
+
 **--help**
 : Show help message and exit.
 

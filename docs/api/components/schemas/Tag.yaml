@@ -1,0 +1,12 @@
+type: object
+properties:
+  id:
+    type: integer
+    readOnly: true
+    description: Unique identifier for the tag.
+    example: 5
+  name:
+    type: string
+    description: Tag name.
+    example: "python"
+required: [id, name]

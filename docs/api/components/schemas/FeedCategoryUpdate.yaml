@@ -1,0 +1,9 @@
+type: object
+properties:
+  category_ids:
+    type: array
+    items:
+      type: integer
+    description: Category IDs to assign. Replaces all existing associations.
+    example: [1, 3]
+required: [category_ids]

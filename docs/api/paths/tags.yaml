@@ -1,0 +1,54 @@
+post:
+  summary: Create a tag
+  operationId: createTag
+  tags: [Tags]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/schemas/TagCreate.yaml"
+  responses:
+    "201":
+      description: Tag created.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/Tag.yaml"
+    "409":
+      description: Tag with this name already exists.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+
+get:
+  summary: List tags
+  operationId: listTags
+  tags: [Tags]
+  parameters:
+    - name: q
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter tags by name (case-insensitive substring match).
+  responses:
+    "200":
+      description: List of tags.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/TagList.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

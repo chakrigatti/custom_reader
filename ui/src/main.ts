@@ -1,9 +1,10 @@
 import { addRoute, navigate, startRouter } from "./router";
 import { mountHeader } from "./components/header";
-import { mountSidebar, refresh as refreshSidebar, setSelected } from "./components/sidebar";
+import { mountSidebar, refresh as refreshSidebar, setSelected, setSelectedCategory } from "./components/sidebar";
 import { mountArticleList, loadArticles, saveScroll } from "./components/article-list";
 import { mountArticleDetail, showArticle } from "./components/article-detail";
 import { mountAddFeedForm } from "./components/add-feed-form";
+import { openCategoryManager } from "./components/category-manager";
 
 type View = "list" | "detail";
 let currentView: View = "list";
@@ -26,6 +27,10 @@ mountHeader(headerEl, {
   },
   onNavigateHome: () => navigate("/"),
   onSyncComplete: () => reloadCurrentList(),
+  onImportComplete: () => {
+    refreshSidebar();
+    reloadCurrentList();
+  },
 });
 
 mountSidebar(sidebarEl, {
@@ -36,13 +41,27 @@ mountSidebar(sidebarEl, {
       navigate(`/feed/${feedId}`);
     }
   },
+  onSelectCategory: (categoryId) => {
+    navigate(`/category/${categoryId}`);
+  },
   onFeedDeleted: () => reloadCurrentList(),
+  onManageCategories: () => {
+    openCategoryManager(document.getElementById("app")!, {
+      onClose: () => {
+        refreshSidebar();
+        reloadCurrentList();
+      },
+    });
+  },
 });
 
 mountArticleList(mainEl, {
   onSelectArticle: (id) => {
     saveScroll();
     navigate(`/article/${id}`);
+  },
+  onSelectTag: (name) => {
+    navigate(`/tag/${encodeURIComponent(name)}`);
   },
 });
 
@@ -75,6 +94,22 @@ addRoute("/feed/:id", (params) => {
 addRoute("/article/:id", (params) => {
   currentView = "detail";
   showArticle(Number(params.id));
+});
+
+addRoute("/category/:id", (params) => {
+  const categoryId = Number(params.id);
+  currentView = "list";
+  currentFeedId = null;
+  setSelectedCategory(categoryId);
+  loadArticles({ category_id: categoryId });
+});
+
+addRoute("/tag/:name", (params) => {
+  const tagName = decodeURIComponent(params.name);
+  currentView = "list";
+  currentFeedId = null;
+  setSelected(null);
+  loadArticles({ tag: tagName });
 });
 
 function reloadCurrentList(): void {

@@ -35,3 +35,8 @@ async def init_db() -> None:
                 "VALUES (1, 'Saved Articles', 'bookmark://saved', 'bookmark://saved', 'bookmark')"
             )
         )
+        # Migration: add favicon_url column if missing
+        result = await conn.execute(text("PRAGMA table_info(feeds)"))
+        columns = [row[1] for row in result]
+        if "favicon_url" not in columns:
+            await conn.execute(text("ALTER TABLE feeds ADD COLUMN favicon_url TEXT"))

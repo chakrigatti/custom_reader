@@ -6,6 +6,8 @@ export interface ArticleListParams {
   feed_id?: number;
   state?: ArticleState;
   source?: string;
+  tag?: string;
+  category_id?: number;
   limit?: number;
   offset?: number;
 }
@@ -18,6 +20,8 @@ export async function getArticles(params: ArticleListParams = {}): Promise<Pagin
   if (params.feed_id !== undefined) query.feed_id = params.feed_id;
   if (params.state !== undefined) query.state = params.state;
   if (params.source !== undefined) query.source = params.source;
+  if (params.tag !== undefined) query.tag = params.tag;
+  if (params.category_id !== undefined) query.category_id = params.category_id;
   return api.get<PaginatedResponse<Article>>("/articles", query);
 }
 

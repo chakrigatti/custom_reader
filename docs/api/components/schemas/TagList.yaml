@@ -1,0 +1,9 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: "./Tag.yaml"
+  total:
+    type: integer
+required: [data, total]

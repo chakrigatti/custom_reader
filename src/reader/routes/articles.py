@@ -37,13 +37,17 @@ async def list_articles(
     feed_id: Optional[int] = Query(default=None),
     state: Optional[str] = Query(default=None),
     source: Optional[str] = Query(default=None),
+    tag: Optional[str] = Query(default=None),
+    category_id: Optional[int] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ) -> ArticleList:
     from reader.services.articles import list_articles
 
-    return await list_articles(db, feed_id, state, source, limit, offset)
+    return await list_articles(
+        db, feed_id, state, source, limit, offset, tag=tag, category_id=category_id
+    )
 
 
 @router.get("/{article_id}")

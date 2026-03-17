@@ -1,0 +1,38 @@
+post:
+  summary: Import feeds from OPML
+  description: >
+    Accepts an OPML file upload and bulk-creates feeds. OPML folder elements
+    are mapped to categories. Feeds that already exist are skipped.
+  operationId: importOPML
+  tags: [OPML]
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+              description: OPML file to import.
+          required: [file]
+  responses:
+    "200":
+      description: Import results.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/OPMLImportResult.yaml"
+    "422":
+      description: Invalid OPML content.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"
+    "500":
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../components/schemas/Error.yaml"

@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: integer
+    readOnly: true
+    description: Unique identifier for the category.
+    example: 1
+  name:
+    type: string
+    description: Category name.
+    example: "Technology"
+  created_at:
+    type: string
+    format: date-time
+    readOnly: true
+    description: When the category was created.
+required: [id, name, created_at]
