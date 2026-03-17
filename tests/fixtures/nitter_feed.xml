@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>@testuser's tweets</title>
+    <link>https://nitter.example.com/testuser</link>
+    <description>Twitter feed for @testuser via Nitter</description>
+
+    <!-- Original tweet 1 -->
+    <item>
+      <title>This is my first original tweet about AI</title>
+      <link>https://nitter.example.com/testuser/status/1001</link>
+      <description><![CDATA[<p>This is my first original tweet about AI</p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 10:00:00 GMT</pubDate>
+    </item>
+
+    <!-- Original tweet 2 -->
+    <item>
+      <title>Another great day for open source</title>
+      <link>https://nitter.example.com/testuser/status/1002</link>
+      <description><![CDATA[<p>Another great day for open source</p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 11:00:00 GMT</pubDate>
+    </item>
+
+    <!-- Retweet — should be filtered out -->
+    <item>
+      <title>RT @otherperson: Check out this cool project</title>
+      <link>https://nitter.example.com/otherperson/status/2001</link>
+      <description><![CDATA[<p>RT @otherperson: Check out this cool project</p>]]></description>
+      <dc:creator>@otherperson</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 12:00:00 GMT</pubDate>
+    </item>
+
+    <!-- Reply — should be filtered out -->
+    <item>
+      <title>@someone I totally agree with you on that</title>
+      <link>https://nitter.example.com/testuser/status/1003</link>
+      <description><![CDATA[<p>@someone I totally agree with you on that</p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 13:00:00 GMT</pubDate>
+    </item>
+
+    <!-- Thread tweet 1 of 3 -->
+    <item>
+      <title>Let me explain how RSS readers work (1/3)</title>
+      <link>https://nitter.example.com/testuser/status/3001</link>
+      <description><![CDATA[<p>Let me explain how RSS readers work (1/3)</p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 14:00:00 GMT</pubDate>
+    </item>
+
+    <!-- Thread tweet 2 of 3 — back-links to 3001 -->
+    <item>
+      <title>First you need a feed parser (2/3)</title>
+      <link>https://nitter.example.com/testuser/status/3002</link>
+      <description><![CDATA[<p>First you need a feed parser (2/3)</p><p>Replying to <a href="/testuser/status/3001">@testuser</a></p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 14:01:00 GMT</pubDate>
+    </item>
+
+    <!-- Thread tweet 3 of 3 — back-links to 3002 -->
+    <item>
+      <title>Then you filter and display them (3/3)</title>
+      <link>https://nitter.example.com/testuser/status/3003</link>
+      <description><![CDATA[<p>Then you filter and display them (3/3)</p><p>Replying to <a href="/testuser/status/3002">@testuser</a></p>]]></description>
+      <dc:creator>@testuser</dc:creator>
+      <pubDate>Mon, 10 Mar 2026 14:02:00 GMT</pubDate>
+    </item>
+
+  </channel>
+</rss>

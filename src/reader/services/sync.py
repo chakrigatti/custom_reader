@@ -41,7 +41,19 @@ async def sync_feed(db: AsyncSession, feed_id: int) -> FetchResult:
     parsed = feedparser.parse(raw)
     fetched_count = 0
 
-    for entry in parsed.entries:
+    entries = parsed.entries
+    if feed.source_type == "nitter":
+        from reader.services.nitter_filter import (
+            consolidate_threads,
+            extract_username_from_feed_url,
+            filter_nitter_entries,
+        )
+
+        username = extract_username_from_feed_url(feed.feed_url)
+        entries = filter_nitter_entries(entries, username)
+        entries = consolidate_threads(entries, username)
+
+    for entry in entries:
         url = entry.get("link")
         if not url:
             continue

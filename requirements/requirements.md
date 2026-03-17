@@ -28,7 +28,7 @@ The CLI never touches the database directly — all reads and writes go through 
 |------|-------|-----|
 | RSS/Atom | Feed URL | feedparser directly |
 | Blog URL | Homepage URL | beautifulsoup4 auto-discovery via `<link rel="alternate">` + common paths (`/feed`, `/rss`, `/atom.xml`, `/feed.xml`, `/index.xml`) |
-| X/Twitter | Handle or nitter URL | Convert to nitter RSS URL (single configurable instance, no fallback in v1) |
+| X/Twitter | Handle or nitter URL | Convert to nitter RSS URL (single configurable instance, no fallback in v1). On sync, filters out retweets and replies, keeping only original posts. Multi-tweet threads are consolidated into single articles. |
 | Bookmark | Standalone URL | Fetch URL directly via httpx, extract content with trafilatura, store under sentinel feed |
 
 ---

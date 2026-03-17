@@ -131,6 +131,64 @@ class TestSyncFeed:
 
 
 @pytest.mark.asyncio
+class TestSyncNitterFeed:
+    @respx.mock
+    async def test_sync_nitter_filters_and_consolidates(
+        self, client: httpx.AsyncClient
+    ):
+        nitter_xml = _load("nitter_feed.xml")
+
+        # Create a nitter feed directly via the DB override
+        # First, mock the discovery endpoint for a nitter handle
+        from unittest.mock import AsyncMock, patch
+
+        mock_detect = AsyncMock(
+            return_value=(
+                "nitter",
+                "https://nitter.example.com/testuser/rss",
+                "@testuser",
+                "https://x.com/testuser",
+            )
+        )
+        with patch("reader.services.discovery.detect_source_type", mock_detect):
+            resp = await client.post(
+                "/feeds", json={"url": "https://x.com/testuser"}
+            )
+            assert resp.status_code == 201
+            feed_id = resp.json()["id"]
+
+        # Mock the sync fetch
+        respx.get("https://nitter.example.com/testuser/rss").mock(
+            return_value=httpx.Response(
+                200,
+                text=nitter_xml,
+                headers={"content-type": "application/rss+xml"},
+            )
+        )
+
+        resp = await client.post(f"/feeds/{feed_id}/sync")
+        assert resp.status_code == 200
+        body = resp.json()
+        # 2 standalone + 1 thread = 3 articles (retweet and reply excluded)
+        assert body["fetched"] == 3
+
+        # Verify articles
+        articles_resp = await client.get(
+            "/articles", params={"feed_id": feed_id}
+        )
+        articles = articles_resp.json()
+        assert articles["total"] == 3
+
+        titles = [a["title"] for a in articles["data"]]
+        # Retweet should NOT be present
+        assert not any("RT @" in t for t in titles)
+        # Reply should NOT be present
+        assert not any(t.startswith("@someone") for t in titles)
+        # Thread should be consolidated
+        assert any("[thread]" in t for t in titles)
+
+
+@pytest.mark.asyncio
 class TestSyncAll:
     @respx.mock
     async def test_sync_all(self, client: httpx.AsyncClient):
