@@ -18,3 +18,4 @@ build/
 .claude/
 .reader-pids
 node_modules/
+.venv
