@@ -1,0 +1,1 @@
+The project is to track blogs I come across. I want to use this to help keep track of what I am reading.
